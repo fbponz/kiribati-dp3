@@ -33,10 +33,8 @@ def RSI(series, period):
     u = u.drop(u.index[:(period-1)])
     d[d.index[period-1]] = np.mean( d[:period] ) #first value is sum of avg losses
     d = d.drop(d.index[:(period-1)])
-    #rs = pd.stats.moments.ewma(u, com=period-1, adjust=False)
     rs=pd.DataFrame.ewm(u,com=period-1,adjust=False).mean()
     pd.DataFrame.ewm(d,com=period-1,adjust=False).mean()
-    #pd.stats.moments.ewma(d, com=period-1, adjust=False)
     return 100 - 100 / (1 + (rs))
 
 #calculation of stochastic osillator.
@@ -114,19 +112,65 @@ def PDG(btcoin):
     btcoin['MA252'] = MA(btcoin, media_mov_long)
     btcoin.dropna(inplace=True)
     return btcoin
+    
+def TDG(actual,anter,vp_1d,vp_5d,vp_30d):
+    
+    if actual > anter:
+        max_val_act = actual
+        diff_act = actual - anter
+        diff_act = (diff_act/max_val_act)*100
+    else:
+        max_val_act = anter
+        diff_act = anter - actual
+        diff_act = -(diff_act/max_val_act)*100
+    
+    if actual > vp_1d:
+        max_val_1d = actual
+        diff_1d = actual - vp_1d
+        diff_p1d = -(diff_1d/max_val_1d)*100
+    else:
+        max_val_1d = vp_1d
+        diff_1d = vp_1d - actual
+        diff_p1d = (diff_1d/max_val_1d)*100
+        
+    if actual > vp_5d:
+        max_val_5d = actual
+        diff_5d = actual - vp_5d
+        diff_p5d = -(diff_5d/max_val_5d)*100
+    else:
+        max_val_5d = vp_5d
+        diff_5d = vp_5d - actual
+        diff_p5d = (diff_5d/max_val_5d)*100
+        
+    if actual > vp_30d:
+        max_val_30d = actual
+        diff_30d = actual - vp_30d
+        diff_p30d = -(diff_30d/max_val_30d)*100
+    else:
+        max_val_30d = vp_30d
+        diff_30d = vp_30d - actual
+        diff_p30d = (diff_30d/max_val_30d)*100
+    
+    data = {'':['actual','1d','5d','30d'],'Valor':[actual,vp_1d,vp_5d,vp_30d],'Diferencial':[diff_act,diff_p1d,diff_p5d,diff_p30d]}
+    pd_data=pd.DataFrame(data)
+    pd_data = pd_data.round(2)
+    return pd_data
 
 def main():
     data_raw = GDT()
     data = PDG(data_raw)
-    
-    st.image('image/kiribati-logo.png', width=424)
+    prediction =TDG(round(data['Close'].iloc[-1],3),49523.3,52343.00,54000.2,48001.23)
+    col1, col2, col3 = st.beta_columns([1,3,1])
+    col2.image('image/kiribati-logo.png', width=424)
     menu = ["Home","About"]
     choice = st.sidebar.selectbox("Menu", menu)
     if choice == 'Home':
         st.subheader("Bitcoin price")
         st.line_chart(data['EMA63'])
-        col1, col2 = st.beta_columns(2)
-        col1.write('Último valor: '+str(round(data['Close'].iloc[-1],3)))
+        col1, col2, col3 = st.beta_columns([1,3,1])
+        col2.write('Tabla de previsiones:')
+        col2.write(prediction)
+        
     else:
         st.subheader("About")
         st.write('Hola Amig@, somos Kiribati. En que podemos ayudarte?')

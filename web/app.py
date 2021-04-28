@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import datetime
+import datetime as dt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import yfinance as yf
 
 #calculation of exponential moving average
@@ -166,7 +168,51 @@ def main():
     choice = st.sidebar.selectbox("Menu", menu)
     if choice == 'Home':
         st.subheader("Bitcoin price")
-        st.line_chart(data['EMA63'])
+        fig = make_subplots(
+                rows=1, cols=2,
+                column_widths=[0.2, 0.8],
+                specs=[[{}, {}]],
+                horizontal_spacing = 0.01
+            )
+            
+        fig.add_trace(
+            go.Candlestick(x=data.index,
+                        open=data['Open'],
+                        high=data['High'],
+                        low=data['Low'],
+                        close=data['Close'],
+                        yaxis= "y2"
+                    ),
+                row = 1, col=2
+            )
+        fig.update_layout(
+            title_text='Market Profile Bitcoin', # title of plot
+            bargap=0.01, # gap between bars of adjacent location coordinates,
+            showlegend=False,
+            
+            xaxis = dict(
+                    showticklabels = False
+                ),
+            yaxis = dict(
+                    showticklabels = False
+                ),
+            
+            yaxis2 = dict(
+                    title = "Price (USD)",
+                    side="right"
+                )
+        )
+
+        fig.update_yaxes(nticks=20)
+        fig.update_yaxes(side="right")
+        fig.update_layout(height=800)
+
+        config={
+                'modeBarButtonsToAdd': ['drawline']
+            }
+
+        st.plotly_chart(fig, use_container_width=True, config=config)
+        
         col1, col2, col3 = st.beta_columns([1,3,1])
         col2.write('Tabla de previsiones:')
         col2.write(prediction)

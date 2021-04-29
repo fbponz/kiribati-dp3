@@ -5,28 +5,22 @@ from diagrams.gcp.database import BigTable
 from diagrams.gcp.storage import GCS
 from diagrams.programming.framework import React
 
-with Diagram("Prediction Bitcoin"):
+with Diagram("Data project3:Bitcoin"):
     pubsub = PubSub("Pub Sub")
     with Cluster("Source data"):
         yfsd = Functions("yahoo finance")
         yfsd >> pubsub
 
-    with Cluster("AI"):
-        with Cluster("ETL process"):
-            with Cluster("Transform"):
-                flow = Functions("data flow")
-
-            with Cluster("Data base"):
-                db = BigQuery("bq")
-                flow >> db
+    with Cluster("Artificial Intelligence - Bitcoin"):
+        flow = Functions("ETL process")
+        with Cluster("Data base"):
+            db = BigQuery("Big Query")
+            flow >> db
         
-        
-        with Cluster("Prediction"):
-            predict = Functions("Calculate Prediction")
+        predict = Functions("Calculate Prediction")
         with Cluster("Update model"):
             CTF = Functions("Control Training")
-            with Cluster("Training"):
-                train = Functions("Training")
+            train = Functions("Training")
             
     
     with Cluster("Web"):

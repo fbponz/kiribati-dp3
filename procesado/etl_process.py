@@ -105,9 +105,6 @@ Dataset = pd.merge(left=Dataset, right=EURUSDCHANRAW, how='left', left_on='BT_Da
 Dataset.drop(['ETH_Date', 'ADA_Date', 'XRP_Date', 'BNB_Date', 'USDT_Date', 'VIX_Date', 'GSPC_Date', 'GCF_Date', 'EURUSDCHAN_Date'], axis=1, inplace=True)
 Dataset.rename(columns={"BT_Date":"Date"},inplace=True)
 
-
-print(Dataset.tail(3))
-
 #Transform
 
 Dataset['year'] = Dataset['Date'].map(lambda x: x.year)
@@ -115,7 +112,7 @@ Dataset['month'] = Dataset['Date'].map(lambda x: x.month)
 Dataset['monthf'] = Dataset['Date'].dt.month_name()
 Dataset['week'] = Dataset['Date'].map(lambda x: x.week)
 Dataset['weekday'] = Dataset['Date'].map(lambda x: x.day)
-Dataset['Weekdayf'] = Dataset['Date'].dt.day_name()
+Dataset['weekdayf'] = Dataset['Date'].dt.day_name()
 Dataset['EMA21'] = EMA(Dataset['BT_Close'], media_mov_short)
 Dataset['EMA63'] = EMA(Dataset['BT_Close'], media_mov_med)
 Dataset['EMA252'] = EMA(Dataset['BT_Close'], media_mov_long)
@@ -162,5 +159,8 @@ Dataset.dropna(inplace=True)
 Dataset.corr()
 
 Dataset.to_csv("../data/data_raw.csv")
+print("Data Raw file created")
 
-
+Dataset_visualization = pd.concat([Dataset['Date'],Dataset['year'],Dataset['month'],Dataset['monthf'],Dataset['week'],Dataset['weekday'],Dataset['weekdayf'],Dataset['MA21'],Dataset['MA63'],Dataset['MA252'],Dataset['BT_Close'],Dataset['BT_Volume'],Dataset['ETH_Close'],Dataset['ETH_Volume'],Dataset['ADA_Close'],Dataset['ADA_Volume'],Dataset['XRP_Close'],Dataset['XRP_Volume'],Dataset['BNB_Close'],Dataset['BNB_Volume'],Dataset['USDT_Close'],Dataset['USDT_Volume']], axis=1, keys=['Date','year','month','monthf','week','weekday','weekdayf','ma_short','ma_medium','ma_long','BT_Close','BT_Volume','ETH_Close','ETH_Volume','ADA_Close','ADA_Volume','XRP_Close','XRP_Volume','BNB_Close','BNB_Volume','USDT_Close','USDT_Volume'])
+Dataset_visualization.to_csv("../data/data_visualization.csv")
+print("Data Visualization file created")

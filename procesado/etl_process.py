@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import datetime
-
 import yfinance as yf
 
 #calculation of exponential moving average
@@ -61,60 +60,107 @@ media_mov_long = 99
 #
 #get data from Yahoo finance.
 #
-btcoin = yf.download("BTC-USD,ETH-USD,ADA-USD,XRP-USD,BNB-USD,USDT-USD,^VIX,^GSPC,GC=F,EURUSD=X",start="2015-01-01", end="2021-05-1")
+BTRAW = yf.download("BTC-USD",start="2015-01-01", end="2021-05-1")
+ETHRAW = yf.download("ETH-USD",start="2015-01-01", end="2021-05-1")
+ADARAW = yf.download("ADA-USD",start="2015-01-01", end="2021-05-1")
+XRPRAW = yf.download("XRP-USD",start="2015-01-01", end="2021-05-1")
+BNBRAW = yf.download("BNB-USD",start="2015-01-01", end="2021-05-1")
+USDTRAW = yf.download("USDT-USD",start="2015-01-01", end="2021-05-1")
+VIXRAW = yf.download("^VIX",start="2015-01-01", end="2021-05-1")
+GSPCRAW = yf.download("^GSPC",start="2015-01-01", end="2021-05-1")
+GCFRAW = yf.download("GC=F",start="2015-01-01", end="2021-05-1")
+EURUSDCHANRAW = yf.download("EURUSD=X",start="2015-01-01", end="2021-05-1")
+
+BTRAW.reset_index(inplace = True)
+ETHRAW.reset_index(inplace = True)
+ADARAW.reset_index(inplace = True)
+XRPRAW.reset_index(inplace = True)
+BNBRAW.reset_index(inplace = True)
+USDTRAW.reset_index(inplace = True)
+VIXRAW.reset_index(inplace = True)
+GSPCRAW.reset_index(inplace = True)
+GCFRAW.reset_index(inplace = True)
+EURUSDCHANRAW.reset_index(inplace = True)
+
+BTRAW = BTRAW.add_prefix('BT_')
+ETHRAW = ETHRAW.add_prefix('ETH_')
+ADARAW = ADARAW.add_prefix('ADA_')
+XRPRAW = XRPRAW.add_prefix('XRP_')
+BNBRAW = BNBRAW.add_prefix('BNB_')
+USDTRAW = USDTRAW.add_prefix('USDT_')
+VIXRAW = VIXRAW.add_prefix('VIX_')
+GSPCRAW = GSPCRAW.add_prefix('GSPC_')
+GCFRAW = GCFRAW.add_prefix('GCF_')
+EURUSDCHANRAW = EURUSDCHANRAW.add_prefix('EURUSDCHAN_')
+
+Dataset = pd.merge(left=BTRAW, right=ETHRAW, how='left', left_on='BT_Date', right_on='ETH_Date')
+Dataset = pd.merge(left=Dataset, right=ADARAW, how='left', left_on='BT_Date', right_on='ADA_Date')
+Dataset = pd.merge(left=Dataset, right=XRPRAW, how='left', left_on='BT_Date', right_on='XRP_Date')
+Dataset = pd.merge(left=Dataset, right=BNBRAW, how='left', left_on='BT_Date', right_on='BNB_Date')
+Dataset = pd.merge(left=Dataset, right=USDTRAW, how='left', left_on='BT_Date', right_on='USDT_Date')
+Dataset = pd.merge(left=Dataset, right=VIXRAW, how='left', left_on='BT_Date', right_on='VIX_Date')
+Dataset = pd.merge(left=Dataset, right=GSPCRAW, how='left', left_on='BT_Date', right_on='GSPC_Date')
+Dataset = pd.merge(left=Dataset, right=GCFRAW, how='left', left_on='BT_Date', right_on='GCF_Date')
+Dataset = pd.merge(left=Dataset, right=EURUSDCHANRAW, how='left', left_on='BT_Date', right_on='EURUSDCHAN_Date')
+Dataset.drop(['ETH_Date', 'ADA_Date', 'XRP_Date', 'BNB_Date', 'USDT_Date', 'VIX_Date', 'GSPC_Date', 'GCF_Date', 'EURUSDCHAN_Date'], axis=1, inplace=True)
+Dataset.rename(columns={"BT_Date":"Date"},inplace=True)
+
+
+print(Dataset.tail(3))
+
 #Transform
-btcoin.reset_index(inplace = True)
-btcoin['year'] = btcoin['Date'].map(lambda x: x.year)
-btcoin['month'] = btcoin['Date'].map(lambda x: x.month)
-btcoin['monthf'] = btcoin['Date'].dt.month_name()
-btcoin['week'] = btcoin['Date'].map(lambda x: x.week)
-btcoin['weekday'] = btcoin['Date'].map(lambda x: x.day)
-btcoin['Weekdayf'] = btcoin['Date'].dt.day_name()
-btcoin['EMA21'] = EMA(btcoin['Close']['BTC-USD'], media_mov_short)
-btcoin['EMA63'] = EMA(btcoin['Close']['BTC-USD'], media_mov_med)
-btcoin['EMA252'] = EMA(btcoin['Close']['BTC-USD'], media_mov_long)
 
-btcoin['bollingerSMA_MVS'] = btcoin['Close']['BTC-USD'].rolling(window=media_mov_short).mean()
-btcoin['bollingerSMA_MVM'] = btcoin['Close']['BTC-USD'].rolling(window=media_mov_med).mean()
-btcoin['bollingerSMA_MVL'] = btcoin['Close']['BTC-USD'].rolling(window=media_mov_long).mean()
-btcoin['bollingerSTD_MVS'] = btcoin['Close']['BTC-USD'].rolling(window=media_mov_short).std()
-btcoin['bollingerSTD_MVM'] = btcoin['Close']['BTC-USD'].rolling(window=media_mov_med).std()
-btcoin['bollingerSTD_MVL'] = btcoin['Close']['BTC-USD'].rolling(window=media_mov_long).std()
-btcoin['Upper_MVS'] = btcoin['bollingerSMA_MVS'] + (btcoin['bollingerSTD_MVS'] * 2)
-btcoin['Lower_MVS'] = btcoin['bollingerSMA_MVS'] - (btcoin['bollingerSTD_MVS'] * 2)
-btcoin['Upper_MVM'] = btcoin['bollingerSMA_MVM'] + (btcoin['bollingerSTD_MVM'] * 2)
-btcoin['Lower_MVM'] = btcoin['bollingerSMA_MVM'] - (btcoin['bollingerSTD_MVM'] * 2)
-btcoin['Upper_MVL'] = btcoin['bollingerSMA_MVL'] + (btcoin['bollingerSTD_MVL'] * 2)
-btcoin['Lower_MVL'] = btcoin['bollingerSMA_MVL'] - (btcoin['bollingerSTD_MVL'] * 2)
+Dataset['year'] = Dataset['Date'].map(lambda x: x.year)
+Dataset['month'] = Dataset['Date'].map(lambda x: x.month)
+Dataset['monthf'] = Dataset['Date'].dt.month_name()
+Dataset['week'] = Dataset['Date'].map(lambda x: x.week)
+Dataset['weekday'] = Dataset['Date'].map(lambda x: x.day)
+Dataset['Weekdayf'] = Dataset['Date'].dt.day_name()
+Dataset['EMA21'] = EMA(Dataset['BT_Close'], media_mov_short)
+Dataset['EMA63'] = EMA(Dataset['BT_Close'], media_mov_med)
+Dataset['EMA252'] = EMA(Dataset['BT_Close'], media_mov_long)
+
+Dataset['bollingerSMA_MVS'] = Dataset['BT_Close'].rolling(window=media_mov_short).mean()
+Dataset['bollingerSMA_MVM'] = Dataset['BT_Close'].rolling(window=media_mov_med).mean()
+Dataset['bollingerSMA_MVL'] = Dataset['BT_Close'].rolling(window=media_mov_long).mean()
+Dataset['bollingerSTD_MVS'] = Dataset['BT_Close'].rolling(window=media_mov_short).std()
+Dataset['bollingerSTD_MVM'] = Dataset['BT_Close'].rolling(window=media_mov_med).std()
+Dataset['bollingerSTD_MVL'] = Dataset['BT_Close'].rolling(window=media_mov_long).std()
+Dataset['Upper_MVS'] = Dataset['bollingerSMA_MVS'] + (Dataset['bollingerSTD_MVS'] * 2)
+Dataset['Lower_MVS'] = Dataset['bollingerSMA_MVS'] - (Dataset['bollingerSTD_MVS'] * 2)
+Dataset['Upper_MVM'] = Dataset['bollingerSMA_MVM'] + (Dataset['bollingerSTD_MVM'] * 2)
+Dataset['Lower_MVM'] = Dataset['bollingerSMA_MVM'] - (Dataset['bollingerSTD_MVM'] * 2)
+Dataset['Upper_MVL'] = Dataset['bollingerSMA_MVL'] + (Dataset['bollingerSTD_MVL'] * 2)
+Dataset['Lower_MVL'] = Dataset['bollingerSMA_MVL'] - (Dataset['bollingerSTD_MVL'] * 2)
 
 
-btcoin['MACD'] = btcoin['EMA21'] - btcoin['EMA63']
+Dataset['MACD'] = Dataset['EMA21'] - Dataset['EMA63']
 
-btcoin['ROC21'] = ROC(btcoin['Close']['BTC-USD'], media_mov_short)
-btcoin['ROC63'] = ROC(btcoin['Close']['BTC-USD'], media_mov_med)
+Dataset['ROC21'] = ROC(Dataset['BT_Close'], media_mov_short)
+Dataset['ROC63'] = ROC(Dataset['BT_Close'], media_mov_med)
 
-btcoin['MOM21'] = MOM(btcoin['Close']['BTC-USD'], media_mov_short)
-btcoin['MOM63'] = MOM(btcoin['Close']['BTC-USD'], media_mov_med)
+Dataset['MOM21'] = MOM(Dataset['BT_Close'], media_mov_short)
+Dataset['MOM63'] = MOM(Dataset['BT_Close'], media_mov_med)
 
-btcoin['RSI21'] = RSI(btcoin['Close']['BTC-USD'], media_mov_short)
-btcoin['RSI63'] = RSI(btcoin['Close']['BTC-USD'], media_mov_med)
-btcoin['RSI252'] = RSI(btcoin['Close']['BTC-USD'], media_mov_long)
+Dataset['RSI21'] = RSI(Dataset['BT_Close'], media_mov_short)
+Dataset['RSI63'] = RSI(Dataset['BT_Close'], media_mov_med)
+Dataset['RSI252'] = RSI(Dataset['BT_Close'], media_mov_long)
 
-btcoin['%K21'] = STOK(btcoin['Close']['BTC-USD'], btcoin['Low']['BTC-USD'], btcoin['High']['BTC-USD'], media_mov_short)
-btcoin['%D21'] = STOD(btcoin['Close']['BTC-USD'], btcoin['Low']['BTC-USD'], btcoin['High']['BTC-USD'], media_mov_short)
-btcoin['%K63'] = STOK(btcoin['Close']['BTC-USD'], btcoin['Low']['BTC-USD'], btcoin['High']['BTC-USD'], media_mov_med)
-btcoin['%D63'] = STOD(btcoin['Close']['BTC-USD'], btcoin['Low']['BTC-USD'], btcoin['High']['BTC-USD'], media_mov_med)
-btcoin['%K252'] = STOK(btcoin['Close']['BTC-USD'], btcoin['Low']['BTC-USD'], btcoin['High']['BTC-USD'], media_mov_long)
-btcoin['%D252'] = STOD(btcoin['Close']['BTC-USD'], btcoin['Low']['BTC-USD'], btcoin['High']['BTC-USD'], media_mov_long)
+Dataset['%K21'] = STOK(Dataset['BT_Close'], Dataset['BT_Low'], Dataset['BT_High'], media_mov_short)
+Dataset['%D21'] = STOD(Dataset['BT_Close'], Dataset['BT_Low'], Dataset['BT_High'], media_mov_short)
+Dataset['%K63'] = STOK(Dataset['BT_Close'], Dataset['BT_Low'], Dataset['BT_High'], media_mov_med)
+Dataset['%D63'] = STOD(Dataset['BT_Close'], Dataset['BT_Low'], Dataset['BT_High'], media_mov_med)
+Dataset['%K252'] = STOK(Dataset['BT_Close'], Dataset['BT_Low'], Dataset['BT_High'], media_mov_long)
+Dataset['%D252'] = STOD(Dataset['BT_Close'], Dataset['BT_Low'], Dataset['BT_High'], media_mov_long)
 
-btcoin['MA21'] = MA(btcoin['Close']['BTC-USD'], media_mov_short)
-btcoin['MA63'] = MA(btcoin['Close']['BTC-USD'], media_mov_med)
-btcoin['MA252'] = MA(btcoin['Close']['BTC-USD'], media_mov_long)
+Dataset['MA21'] = MA(Dataset['BT_Close'], media_mov_short)
+Dataset['MA63'] = MA(Dataset['BT_Close'], media_mov_med)
+Dataset['MA252'] = MA(Dataset['BT_Close'], media_mov_long)
 
-btcoin.dropna(inplace=True)
+Dataset.dropna(inplace=True)
 
-btcoin.corr()
+Dataset.corr()
 
-btcoin.to_csv("bitcoin_dataset.csv")
+Dataset.to_csv("../data/data_raw.csv")
 
 

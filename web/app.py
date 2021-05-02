@@ -4,6 +4,9 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
+import calmap
 
 def read_data_csv():
     df = pd.read_csv("../data/data_visualization.csv",sep=',')
@@ -20,7 +23,7 @@ def main():
     menu = ["Home","About"]
     choice = st.sidebar.selectbox("Menu", menu)
     if choice == 'Home':
-        st.subheader("Home")
+        col1, col2 = st.beta_columns((2,1))
         fig = go.Figure(data=[go.Candlestick(x=datavi['Date'],open=datavi['BT_Open'], high=datavi['BT_High'],low=datavi['BT_Low'], close=datavi['BT_Close'],name="Bitcoin")])
         fig.add_trace(go.Scatter(
             x=datavi['Date'],
@@ -32,13 +35,8 @@ def main():
             y=datavi['ma_medium'],
             name="MA 25 days"       # this sets its legend entry
         ))
-        fig.add_trace(go.Scatter(
-            x=datavi['Date'],
-            y=datavi['ma_long'],
-            name="MA 100 days"       # this sets its legend entry
-        ))
-        fig.update_layout(xaxis_rangeslider_visible=False)
-        st.plotly_chart(fig)
+        fig.update_layout(height=600, width=600, title_text="Bitcoin value evolution", xaxis_rangeslider_visible=False)
+        col1.plotly_chart(fig)
         
         fig1 = make_subplots(rows=5, cols=1)
 
@@ -73,9 +71,21 @@ def main():
         ), row=5, col=1)
 
         fig1.update_layout(height=600, width=600, title_text="Other Crypto-coins")
-        st.plotly_chart(fig1)
+        col2.plotly_chart(fig1)
         
-
+        col3, col4 = st.beta_columns(2)
+        objects = ('Bitcoin', 'Ethereum', 'Cardano', 'Ripple', 'Binance', 'Tether')
+        y_pos = np.arange(len(objects))
+        performance = [datavi['BT_Volume'].iloc[-1],datavi['ETH_Volume'].iloc[-1],datavi['ADA_Volume'].iloc[-1],datavi['XRP_Volume'].iloc[-1],datavi['BNB_Volume'].iloc[-1],datavi['USDT_Volume'].iloc[-1]]
+        fig2, (ax) = plt.subplots()
+        ax.barh(y_pos, performance, align='center', alpha=0.5)
+        plt.yticks(y_pos, objects)
+        plt.xlabel('Coin Volume')
+        plt.title('Cryptocoins volume market')
+        col4.pyplot(fig2)
+        
+        
+        
     else:
         st.subheader("About")
         st.write('Hola Amig@, somos Kiribati. En que podemos ayudarte?')

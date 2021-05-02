@@ -161,6 +161,12 @@ Dataset.corr()
 Dataset.to_csv("../data/data_raw.csv")
 print("Data Raw file created")
 
-Dataset_visualization = pd.concat([Dataset['Date'],Dataset['year'],Dataset['month'],Dataset['monthf'],Dataset['week'],Dataset['weekday'],Dataset['weekdayf'],Dataset['MA21'],Dataset['MA63'],Dataset['MA252'],Dataset['BT_Close'],Dataset['BT_Volume'],Dataset['ETH_Close'],Dataset['ETH_Volume'],Dataset['ADA_Close'],Dataset['ADA_Volume'],Dataset['XRP_Close'],Dataset['XRP_Volume'],Dataset['BNB_Close'],Dataset['BNB_Volume'],Dataset['USDT_Close'],Dataset['USDT_Volume']], axis=1, keys=['Date','year','month','monthf','week','weekday','weekdayf','ma_short','ma_medium','ma_long','BT_Close','BT_Volume','ETH_Close','ETH_Volume','ADA_Close','ADA_Volume','XRP_Close','XRP_Volume','BNB_Close','BNB_Volume','USDT_Close','USDT_Volume'])
+##Datos visualization
+
+Dataset_visualization = pd.concat([Dataset['Date'],Dataset['year'],Dataset['month'],Dataset['monthf'],Dataset['week'],Dataset['weekday'],Dataset['weekdayf'],Dataset['MA21'],Dataset['MA63'],Dataset['MA252'],Dataset['BT_Close'],Dataset['BT_Open'],Dataset['BT_High'],Dataset['BT_Low'],Dataset['BT_Volume'],Dataset['ETH_Close'],Dataset['ETH_Volume'],Dataset['ADA_Close'],Dataset['ADA_Volume'],Dataset['XRP_Close'],Dataset['XRP_Volume'],Dataset['BNB_Close'],Dataset['BNB_Volume'],Dataset['USDT_Close'],Dataset['USDT_Volume']], axis=1, keys=['Date','year','month','monthf','week','weekday','weekdayf','ma_short','ma_medium','ma_long','BT_Close','BT_Open','BT_High','BT_Low','BT_Volume','ETH_Close','ETH_Volume','ADA_Close','ADA_Volume','XRP_Close','XRP_Volume','BNB_Close','BNB_Volume','USDT_Close','USDT_Volume'])
+
+##Slice a concrete months
+Dataset_visualization = Dataset_visualization[Dataset_visualization["year"]==2021]
+Dataset_visualization = Dataset_visualization[Dataset_visualization["month"]>0]
 Dataset_visualization.to_csv("../data/data_visualization.csv")
 print("Data Visualization file created")

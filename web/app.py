@@ -12,31 +12,39 @@ def read_data_csv():
     df = pd.read_csv("../data/data_visualization.csv",sep=',')
     return df
 
+def read_data_prediction():
+    df = pd.read_csv("../data/data_predictions.csv",sep=',')
+    return df
+
 def plot_candles(data):
 
     return fig
     
 def main():
     datavi = read_data_csv()
-    col1, col2, col3 = st.beta_columns([1,3,1])
+    datapredict = read_data_prediction()
+    st.set_page_config(layout="wide")
+    col1, col2, col3 = st.beta_columns([6,6,6])
     col2.image('image/kiribati-logo.png', width=424)
-    col1, col2 = st.beta_columns((5,1))
+    col1, col2 = st.beta_columns((1,1))
     fig = go.Figure(data=[go.Candlestick(x=datavi['Date'],open=datavi['BT_Open'], high=datavi['BT_High'],low=datavi['BT_Low'], close=datavi['BT_Close'],name="Bitcoin")])
     fig.add_trace(go.Scatter(
         x=datavi['Date'],
         y=datavi['ma_short'],
-        name="MA 5 days"       # this sets its legend entry
+        name="MA 5 days",       # this sets its legend entry
+        line_color='rgb(0,176,246)'
     ))
     fig.add_trace(go.Scatter(
         x=datavi['Date'],
         y=datavi['ma_medium'],
-        name="MA 25 days"       # this sets its legend entry
+        name="MA 25 days",       # this sets its legend entry
+        line_color='rgb(255,0,255)'
     ))
-    fig.update_layout(height=600, width=600, title_text="Bitcoin value evolution", xaxis_rangeslider_visible=False)
+    fig.update_layout(height=600, width=950, title_text="Bitcoin value evolution", xaxis_rangeslider_visible=False)
     col1.plotly_chart(fig)
     
+    col3, col4 = st.beta_columns((1,1))
     fig1 = make_subplots(rows=5, cols=1)
-
     fig1.append_trace(go.Scatter(
         x=datavi['Date'],
         y=datavi['ETH_Close'],
@@ -68,9 +76,8 @@ def main():
     ), row=5, col=1)
 
     fig1.update_layout(height=600, width=600, title_text="Other Crypto-coins")
-    col2.plotly_chart(fig1)
+    col3.plotly_chart(fig1)
     
-    col3, col4 = st.beta_columns(2)
     objects = ('Bitcoin', 'Ethereum', 'Cardano', 'Ripple', 'Binance', 'Tether')
     y_pos = np.arange(len(objects))
     performance = [datavi['BT_Volume'].iloc[-1],datavi['ETH_Volume'].iloc[-1],datavi['ADA_Volume'].iloc[-1],datavi['XRP_Volume'].iloc[-1],datavi['BNB_Volume'].iloc[-1],datavi['USDT_Volume'].iloc[-1]]

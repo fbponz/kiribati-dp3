@@ -16,13 +16,18 @@ def read_data_prediction():
     df = pd.read_csv("../data/data_predictions.csv",sep=',')
     return df
 
-def plot_candles(data):
-
-    return fig
+def read_data_bitcoin():
+    df = read_data_prediction()
+    data = [df.loc[[0], ['BT_Value']], df.loc[[1], ['BT_Value']], df.loc[[2], ['BT_Value']], df.loc[[3], ['BT_Value']]]
+    return df['BT_Value']
+def transform_data_bitcoin(data_in):
+    data = [0, 0.9, 3.6, 10]
+    return data
     
 def main():
     datavi = read_data_csv()
     datapredict = read_data_prediction()
+    datapercentage =transform_data_bitcoin(datapredict)
     st.set_page_config(layout="wide")
     col1, col2, col3 = st.beta_columns([6,6,6])
     col2.image('image/kiribati-logo.png', width=424)
@@ -40,8 +45,38 @@ def main():
         name="MA 25 days",       # this sets its legend entry
         line_color='rgb(255,0,255)'
     ))
-    fig.update_layout(height=600, width=950, title_text="Bitcoin value evolution", xaxis_rangeslider_visible=False)
+    fig.update_layout(height=600, width=600, title_text="Bitcoin value evolution", xaxis_rangeslider_visible=False)
     col1.plotly_chart(fig)
+    
+    
+    
+    headerColor = 'grey'
+    rowEvenColor = 'lightgrey'
+    rowOddColor = 'white'
+    datapredict = read_data_bitcoin()
+    
+    fig3 = go.Figure(data=[go.Table(
+  header=dict(
+    values=['<b>Time</b>','<b>Value</b>','<b>%</b>'],
+    line_color='darkslategray',
+    fill_color=headerColor,
+    align=['left','center'],
+    font=dict(color='white', size=14)
+      ),
+      cells=dict(
+        values=[
+          ['Actual', '1 day prediction', '5 days prediction', '30 days prediction'],
+           datapredict,datapercentage],
+        line_color='darkslategray',
+        # 2-D list of colors for alternating rows
+        fill_color = [[rowOddColor,rowEvenColor,rowOddColor, rowEvenColor,rowOddColor]*5],
+        align = ['left', 'center'],
+        font = dict(color = 'darkslategray', size = 14)
+        ))
+    ])
+    
+    fig3.update_layout(height=600, width=600, title_text="Bitcoin value evolution", xaxis_rangeslider_visible=False)
+    col2.plotly_chart(fig3)
     
     col3, col4 = st.beta_columns((1,1))
     fig1 = make_subplots(rows=5, cols=1)
@@ -78,15 +113,14 @@ def main():
     fig1.update_layout(height=600, width=600, title_text="Other Crypto-coins")
     col3.plotly_chart(fig1)
     
-    objects = ('Bitcoin', 'Ethereum', 'Cardano', 'Ripple', 'Binance', 'Tether')
-    y_pos = np.arange(len(objects))
     performance = [datavi['BT_Volume'].iloc[-1],datavi['ETH_Volume'].iloc[-1],datavi['ADA_Volume'].iloc[-1],datavi['XRP_Volume'].iloc[-1],datavi['BNB_Volume'].iloc[-1],datavi['USDT_Volume'].iloc[-1]]
-    fig2, (ax) = plt.subplots()
-    ax.barh(y_pos, performance, align='center', alpha=0.5)
-    plt.yticks(y_pos, objects)
-    plt.xlabel('Coin Volume')
-    plt.title('Cryptocoins volume market')
-    col4.pyplot(fig2)
+    fig2 = go.Figure(go.Bar(
+                x=performance,
+                y= ['Bitcoin', 'Ethereum', 'Cardano', 'Ripple', 'Binance', 'Tether-USD'],
+                orientation='h'))
+    fig2.update_layout(height=600, width=600, title_text="Market volume")
+
+    col4.plotly_chart(fig2)
 
 
 if __name__=='__main__':
